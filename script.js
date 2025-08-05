@@ -33,30 +33,47 @@ const chart = new Chart(ctx, {
       },
       legend: {
         display: true,
-        position: 'top'
+        position: 'top',
+        labels: {
+          font: {
+            size: 18
+          }
+        }
       }
     },
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Measurement Repeat Count'
+          text: 'Measurement Repeat Count',
+          font: {
+            size: 18,
+          }
         },
         min: 1,
         max: 10,
         ticks: {
-          stepSize: 1
+          stepSize: 1,
+          font: {
+            size: 18,
+          }
         }
       },
       y: {
         title: {
           display: true,
-          text: 'Median Time (ms)'
+          text: 'Median Time (ms)',
+          font: {
+            size: 18,
+          }
         },
         min: 0,
         max: 2000,
         ticks: {
-          stepSize: 200
+          stepSize: 200,
+          font: {
+            size: 18,
+          }
         }
       }
     }
