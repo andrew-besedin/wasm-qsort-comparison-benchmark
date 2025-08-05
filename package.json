@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "assemblyscript": "^0.28.3"
+    "assemblyscript": "^0.28.3",
+    "serve": "^14.2.4"
   }
 }

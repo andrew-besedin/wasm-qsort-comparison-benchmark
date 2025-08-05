@@ -73,10 +73,6 @@ try {
 
   const numbersJson = await fetch('numbers.json').then(res => res.text());
 
-  const avgMeasurementsJS = [];
-  const avgMeasurementsAS = [];
-  const avgMeasurementsC = [];
-
   // MARK: Sort measurements logic
 
   function qsortJS(array) {
@@ -198,11 +194,15 @@ try {
       }
     });
 
-    return measuresAS;
+    measuresAS.sort((a, b) => a - b);
+
+    const time = measuresAS.at(Math.floor(measuresAS.length / 2));
+
+    return time;
   }
 
   async function getAverageTimeC(repeatTimes) {
-    const measuresC = await Measurements.getMeasurements({
+    const measures = await Measurements.getMeasurements({
       id: 'c',
       repeatTimes,
       fn: qsortC,
@@ -227,11 +227,19 @@ try {
       },
     });
 
-    return measuresC;
+    measures.sort((a, b) => a - b);
+
+    const time = measures.at(Math.floor(measures.length / 2));
+
+    return time;
   }
 
-
   // MARK: Calculations
+
+  const avgMeasurementsJS = [];
+  const avgMeasurementsAS = [];
+  const avgMeasurementsC = [];
+
   const repeats = 10;
 
   chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
