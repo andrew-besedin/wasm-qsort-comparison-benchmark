@@ -64,6 +64,9 @@ const chart = new Chart(ctx, {
 });
 
 try {
+  const repeats = 10;
+
+  document.getElementById('table') && initTable();
   // MARK: Initialize Emscripten and numbers
   await instantiateEmscripten();
 
@@ -72,7 +75,46 @@ try {
     ['number', 'number', 'number']);
 
   const numbersJson = await fetch('numbers.json').then(res => res.text());
+  
+  function initTable() {
+    const tableHead = document.getElementById('table_head');
+    const tableBody = document.getElementById('table_body');
 
+    const langs = {
+      "js": "JS",
+      "as": "AssemblyScript",
+      "c": "C",
+    };
+    const headerRow = document.createElement('tr');
+    const emptyHeader = document.createElement('th');
+    
+    headerRow.appendChild(emptyHeader);
+
+    for (let i = 0; i < repeats; i++) {
+      const header = document.createElement('th');
+      header.innerText = `${i + 1}`;
+      headerRow.appendChild(header);
+    }
+
+    tableHead.appendChild(headerRow);
+
+    for (const lang of Object.entries(langs)) {
+      const tableRow = document.createElement('tr');
+      const landHeader = document.createElement('th');
+
+      landHeader.innerText = lang[1];
+
+      tableRow.appendChild(landHeader);
+
+      for (let i = 0; i < repeats; i++) {
+        const tableData = document.createElement('td');
+        tableData.setAttribute('id', `${lang[0]}-${i}`);
+        tableRow.appendChild(tableData);
+      }
+
+      tableBody.appendChild(tableRow);
+    }
+  }
   // MARK: Sort measurements logic
 
   function qsortJS(array) {
@@ -236,54 +278,64 @@ try {
 
   // MARK: Calculations
 
-  const avgMeasurementsJS = [];
-  const avgMeasurementsAS = [];
-  const avgMeasurementsC = [];
+  function setCellValue(langCode, i, time) {
+    const cell = document.getElementById(`${langCode}-${i}`);
+    cell && (cell.innerText = time.toFixed(3));
+  }
 
-  const repeats = 10;
+  async function main() {
+    const avgMeasurementsJS = [];
+    const avgMeasurementsAS = [];
+    const avgMeasurementsC = [];
 
-  chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
-  chart.update();
-
-  for (let i = 0; i < 10; i++) {
-    const timeJS = await getAverageTimeJS(repeats);
-    avgMeasurementsJS.push(timeJS);
-    if (i === 0) {
-      chart.options.scales.y.min = undefined;
-      chart.options.scales.y.max = undefined;
-      chart.options.scales.y.ticks.stepSize = undefined;
-    }
-    chart.data.datasets[0] = {
-      label: 'JS',
-      data: avgMeasurementsJS,
-      borderColor: 'green',
-      fill: false
-    }
+    chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
     chart.update();
 
-    const timeAS = await getAverageTimeAS(repeats);
-    avgMeasurementsAS.push(timeAS);
-    chart.data.datasets[1] = {
-      label: 'AssemblyScript',
-      data: avgMeasurementsAS,
-      borderColor: 'red',
-      fill: false
-    }
-    chart.update();
+    for (let i = 0; i < 10; i++) {
+      const timeJS = await getAverageTimeJS(repeats);
+      avgMeasurementsJS.push(timeJS);
+      setCellValue('js', i, timeJS);
+      if (i === 0) {
+        chart.options.scales.y.min = undefined;
+        chart.options.scales.y.max = undefined;
+        chart.options.scales.y.ticks.stepSize = undefined;
+      }
+      chart.data.datasets[0] = {
+        label: 'JS',
+        data: avgMeasurementsJS,
+        borderColor: 'green',
+        fill: false
+      }
+      chart.update();
 
-    const timeC = await getAverageTimeC(repeats);
-    avgMeasurementsC.push(timeC);
-    chart.data.datasets[2] = {
-      label: 'C',
-      data: avgMeasurementsC,
-      borderColor: 'blue',
-      fill: false
+      const timeAS = await getAverageTimeAS(repeats);
+      setCellValue('as', i, timeAS);
+      avgMeasurementsAS.push(timeAS);
+      chart.data.datasets[1] = {
+        label: 'AssemblyScript',
+        data: avgMeasurementsAS,
+        borderColor: 'red',
+        fill: false
+      }
+      chart.update();
+
+      const timeC = await getAverageTimeC(repeats);
+      setCellValue('c', i, timeC);
+      avgMeasurementsC.push(timeC);
+      chart.data.datasets[2] = {
+        label: 'C',
+        data: avgMeasurementsC,
+        borderColor: 'blue',
+        fill: false
+      }
+      chart.update();
     }
+
+    chart.options.plugins.subtitle.text = 'Finished';
     chart.update();
   }
 
-  chart.options.plugins.subtitle.text = 'Finished';
-  chart.update();
+  await main();
 } catch (err) {
   chart.options.plugins.subtitle.text = 'ERROR. Go to console to view details.';
   chart.options.plugins.subtitle.color = '#ff0000';

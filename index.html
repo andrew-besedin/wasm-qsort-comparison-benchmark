@@ -12,9 +12,19 @@
             border: 0;
             display: flex;
             overflow: auto;
+            flex-direction: column;
         }
         canvas {
             height: calc(100vh - 15px) !important;
+        }
+        table {
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            width: fit-content;
         }
     </style>
 </head>
@@ -31,7 +41,15 @@
         }
     </script>
     <script src="./build/emscripten/quicksortInt.js"></script>
-    <canvas id="canvas" width="1500px" height="1000px"></canvas>
+    <div>
+        <canvas id="canvas" width="1500px" height="1000px"></canvas>
+    </div>
+    <table id="table">
+        <thead id="table_head">
+        </thead>
+        <tbody id="table_body">
+        </tbody>
+    </table>
     <script type="module" src="./script.js"></script>
 </body>
 </html>
