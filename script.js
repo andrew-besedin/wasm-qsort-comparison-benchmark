@@ -1,3 +1,6 @@
+// MARK: Imports
+import { qsort as qsortAS, garbageCollect } from "./build/AssemblyScript/release.js";
+
 
 // MARK: Initialize chart
 const ctx = document.getElementById('canvas').getContext('2d');
@@ -22,7 +25,7 @@ const chart = new Chart(ctx, {
       subtitle: {
         display: true,
         text: [
-          'Loading... (page may freeze)',
+          'Calculating... (page may freeze)',
           'Do not open DevTools and do not minimize browser window for best results.',
         ],
         font: {
@@ -67,8 +70,9 @@ const chart = new Chart(ctx, {
 const numbersJson = await fetch('numbers.json').then(res => res.text());
 
 const avgMeasurementsJS = [];
+const avgMeasurementsAS = [];
 
-function qsort(array) {
+function qsortJS(array) {
   var stack = [];
 
   stack.push({
@@ -153,8 +157,8 @@ class Measurements {
 async function getAverageTimeJS(repeatTimes) {
   const measuresJS = await Measurements.getMeasurements({
     id: 'js',
-    repeatTimes: 10,
-    fn: qsort,
+    repeatTimes,
+    fn: qsortJS,
     prepare: () => {
       const numbers = JSON.parse(numbersJson);
       return {
@@ -170,33 +174,66 @@ async function getAverageTimeJS(repeatTimes) {
   return timeJS;
 }
 
-const repeats = 10;
+async function getAverageTimeAS(repeatTimes) {
+  const measuresAS = await Measurements.getMeasurements({
+    id: 'as',
+    repeatTimes,
+    fn: qsortAS,
+    prepare: () => {
+      const numbersArr = JSON.parse(numbersJson);
+      const numbers = new Int32Array(numbersArr);
+      return {
+        fnArgs: [numbers],
+      }
+    },
+    cleanup: () => {
+      garbageCollect();
+    }
+  });
 
-chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
-chart.update();
-
-for (let i = 0; i < 10; i++) {
-  const timeJS = await getAverageTimeJS(repeats);
-
-  avgMeasurementsJS.push(timeJS);
-
-  chart.data.datasets[0] = {
-    label: 'JS',
-    data: avgMeasurementsJS,
-    borderColor: 'green',
-    fill: false
-  }
-
-  if (i === 0) {
-    chart.options.scales.y.min = undefined;
-    chart.options.scales.y.max = undefined;
-    chart.options.scales.y.ticks.stepSize = undefined;
-  }
-
-  chart.update();
-
-  console.log('avgMeasurementsJS', avgMeasurementsJS);
+  return measuresAS;
 }
 
-chart.options.plugins.subtitle.text = 'Finished';
-chart.update();
+
+// MARK: Calculations
+try {
+  const repeats = 10;
+
+  chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
+  chart.update();
+
+  for (let i = 0; i < 10; i++) {
+    const timeJS = await getAverageTimeJS(repeats);
+    avgMeasurementsJS.push(timeJS);
+    if (i === 0) {
+      chart.options.scales.y.min = undefined;
+      chart.options.scales.y.max = undefined;
+      chart.options.scales.y.ticks.stepSize = undefined;
+    }
+    chart.data.datasets[0] = {
+      label: 'JS',
+      data: avgMeasurementsJS,
+      borderColor: 'green',
+      fill: false
+    }
+    chart.update();
+
+    const timeAS = await getAverageTimeAS(repeats);
+    avgMeasurementsAS.push(timeAS);
+    chart.data.datasets[1] = {
+      label: 'AssemblyScript',
+      data: avgMeasurementsAS,
+      borderColor: 'red',
+      fill: false
+    }
+    chart.update();
+  }
+
+  chart.options.plugins.subtitle.text = 'Finished';
+  chart.update();
+} catch (err) {
+  chart.options.plugins.subtitle.text = 'ERROR. Go to console to view details.';
+  chart.options.plugins.subtitle.color = '#ff0000';
+  chart.update();
+  throw err;
+}

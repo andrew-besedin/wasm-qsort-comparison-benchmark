@@ -4,9 +4,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "assemblyscript:build": "asc src/AssemblyScript/index.ts --optimizeLevel=3 --converge --noAssert --uncheckedBehavior=always --runtime=minimal --target=release",
     "start": "npx serve ."
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "assemblyscript": "^0.28.3"
+  }
 }

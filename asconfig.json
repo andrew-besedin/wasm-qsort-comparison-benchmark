@@ -1,0 +1,13 @@
+{
+  "targets": {
+    "release": {
+      "outFile": "build/AssemblyScript/release.wasm",
+      "textFile": "build/AssemblyScript/release.wat",
+      "sourceMap": true,
+      "shrinkLevel": 0
+    }
+  },
+  "options": {
+    "bindings": "esm"
+  }
+}
