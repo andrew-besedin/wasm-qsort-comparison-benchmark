@@ -178,8 +178,6 @@ chart.update();
 for (let i = 0; i < 10; i++) {
   const timeJS = await getAverageTimeJS(repeats);
 
-  chart.update();
-
   avgMeasurementsJS.push(timeJS);
 
   chart.data.datasets[0] = {
@@ -199,3 +197,6 @@ for (let i = 0; i < 10; i++) {
 
   console.log('avgMeasurementsJS', avgMeasurementsJS);
 }
+
+chart.options.plugins.subtitle.text = 'Finished';
+chart.update();
