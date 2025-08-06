@@ -16,7 +16,7 @@ const chart = new Chart(ctx, {
     plugins: {
       title: {
         display: true,
-        text: 'WASM Quick Sort Comparison Benchmark',
+        text: 'WASM Quicksort Comparison Benchmark',
         font: {
           size: 18
         }

@@ -1,4 +1,4 @@
-# WASM Quick Sort Comparison Benchmark
+# WASM Quicksort Comparison Benchmark
 
 Created by andrew.besedin for a research publication comparing the performance of JavaScript and WebAssembly.
 
