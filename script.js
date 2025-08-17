@@ -24,7 +24,7 @@ const chart = new Chart(ctx, {
       subtitle: {
         display: true,
         text: [
-          'Calculating... (page may freeze)',
+          'Preparations...',
           'Do not open DevTools and do not minimize browser window for best results.',
         ],
         font: {
@@ -133,6 +133,8 @@ try {
     }
   }
   // MARK: Sort measurements logic
+
+  chart.options.plugins.subtitle.text[0] = 'Calculating... (page may freeze)';
 
   function qsortJS(array) {
     var stack = [];
