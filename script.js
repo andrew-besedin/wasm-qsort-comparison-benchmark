@@ -62,7 +62,7 @@ const chart = new Chart(ctx, {
       y: {
         title: {
           display: true,
-          text: 'Median Time (ms)',
+          text: 'Trimmed Mean Time (ms)',
           font: {
             size: 18,
           }
@@ -216,10 +216,24 @@ try {
 
       return measures;
     }
+
+    static async getTrimmedMean(values) {
+      if (values.length < 3) {
+        return values.reduce((a, b) => a + b, 0) / values.length;
+      }
+      const trimAmount = Math.floor(values.length * 0.2);
+
+      const sortedValues = [...values].sort((a, b) => a - b);
+      const trimmedValues = sortedValues.slice(trimAmount, sortedValues.length - trimAmount);
+      const sum = trimmedValues.reduce((a, b) => a + b, 0);
+      const trimmedMean = sum / trimmedValues.length;
+
+      return trimmedMean;
+    }
   }
 
   async function getAverageTimeJS(repeatTimes) {
-    const measuresJS = await Measurements.getMeasurements({
+    const measures = await Measurements.getMeasurements({
       id: 'js',
       repeatTimes,
       fn: qsortJS,
@@ -231,15 +245,11 @@ try {
       },
     });
 
-    measuresJS.sort((a, b) => a - b);
-
-    const timeJS = measuresJS.at(Math.floor(measuresJS.length / 2));
-
-    return timeJS;
+    return Measurements.getTrimmedMean(measures);
   }
 
   async function getAverageTimeAS(repeatTimes) {
-    const measuresAS = await Measurements.getMeasurements({
+    const measures = await Measurements.getMeasurements({
       id: 'as',
       repeatTimes,
       fn: qsortAS,
@@ -255,11 +265,7 @@ try {
       }
     });
 
-    measuresAS.sort((a, b) => a - b);
-
-    const time = measuresAS.at(Math.floor(measuresAS.length / 2));
-
-    return time;
+    return Measurements.getTrimmedMean(measures);
   }
 
   async function getAverageTimeC(repeatTimes) {
@@ -288,11 +294,7 @@ try {
       },
     });
 
-    measures.sort((a, b) => a - b);
-
-    const time = measures.at(Math.floor(measures.length / 2));
-
-    return time;
+    return Measurements.getTrimmedMean(measures);
   }
 
   // MARK: Calculations
@@ -307,7 +309,7 @@ try {
     const avgMeasurementsAS = [];
     const avgMeasurementsC = [];
 
-    chart.options.scales.y.title.text = `Median Time of ${repeats} repeats (ms)`;
+    chart.options.scales.y.title.text = `Trimmed Mean Time of ${repeats} repeats (ms)`;
     chart.update();
 
     for (let i = 0; i < 10; i++) {
